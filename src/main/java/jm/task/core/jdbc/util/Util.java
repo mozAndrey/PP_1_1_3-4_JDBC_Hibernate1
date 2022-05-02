@@ -14,7 +14,14 @@ import java.util.Properties;
 
 public class Util {
     // реализуйте настройку соеденения с БД
-    private static SessionFactory sessionFactory;
+    private static volatile SessionFactory sessionFactory;
+
+    static {
+        buildSessionFactory();
+    }
+
+    private Util() {
+    }
 
     public static Connection getConnection() throws ClassNotFoundException, SQLException {
         String userName = "root";
@@ -24,7 +31,8 @@ public class Util {
         return DriverManager.getConnection(connectionURL, userName, password);
     }
 
-    public static SessionFactory getSessionFactory() throws SQLException, ClassNotFoundException {
+
+    private static void buildSessionFactory() {
         Properties properties = new Properties();
         Configuration configuration = new Configuration();
         properties.setProperty("hibernate.connection.url", "jdbc:mysql://localhost:3306/hibernate");
@@ -40,7 +48,9 @@ public class Util {
         StandardServiceRegistryBuilder serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties());
         sessionFactory = configuration.buildSessionFactory(serviceRegistry.build());
+    }
 
+    public static SessionFactory getSessionFactory() throws SQLException, ClassNotFoundException {
         return sessionFactory;
     }
 
